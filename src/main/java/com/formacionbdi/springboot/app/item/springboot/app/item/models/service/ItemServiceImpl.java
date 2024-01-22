@@ -12,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.formacionbdi.springboot.app.item.springboot.app.item.models.Item;
 import com.formacionbdi.springboot.app.item.springboot.app.item.models.Producto;
+import com.formacionbdi.springboot.app.item.springboot.app.item.util.ProductNotFoundException;
 
 @Service("serviceRestTemplate")
 public class ItemServiceImpl implements ItemService {
@@ -30,7 +31,13 @@ public class ItemServiceImpl implements ItemService {
     Map<String, String> pathVariable = new HashMap<String, String>();
     pathVariable.put("typeProduct", typeProduct);
     List<Producto> productos = Arrays.asList(clienteRest.getForObject("http://servicio-productos/listar/{typeProduct}", Producto[].class, pathVariable));
-    return productos.stream().map(p -> new Item(p)).collect(Collectors.toList());
+    List<Item> productsList = productos.stream()
+    .filter(producto -> producto.getTypeProduct().equalsIgnoreCase(typeProduct))
+    .map(p -> new Item(p)).collect(Collectors.toList());
+    if (productsList.isEmpty()) {
+      throw new ProductNotFoundException("No se encontraron productos para el tipo: " + typeProduct);
+    }
+    return productsList;
   }
 
   @Override
@@ -38,7 +45,9 @@ public class ItemServiceImpl implements ItemService {
     Map<String, String> pathVariable = new HashMap<String, String>();
     pathVariable.put("price", price.toString());
     List<Producto> productos = Arrays.asList(clienteRest.getForObject("http://servicio-productos/listar/precio/{price}", Producto[].class, pathVariable));
-    return productos.stream().map(p -> new Item(p)).collect(Collectors.toList());
+    return productos.stream()
+    .filter(producto -> producto.getPrice() > price)
+    .map(p -> new Item(p)).collect(Collectors.toList());
   }
 
   @Override
@@ -46,7 +55,9 @@ public class ItemServiceImpl implements ItemService {
     Map<String, String> pathVariable = new HashMap<String, String>();
     pathVariable.put("name", name.toString());
     List<Producto> productos = Arrays.asList(clienteRest.getForObject("http://servicio-productos/listar/byName/{name}", Producto[].class, pathVariable));
-    return productos.stream().map(p -> new Item(p)).collect(Collectors.toList());
+    return productos.stream()
+    .filter(producto -> producto.getNameProduct().toLowerCase().contains(name.toLowerCase()))
+    .map(p -> new Item(p)).collect(Collectors.toList());
   }
 
   @Override

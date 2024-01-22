@@ -10,6 +10,5 @@ public interface ItemService {
   public List<Item> findByTypeProduct(String typeProduct);
   public List<Item> findByRangeOfPrice(Double price);
   public List<Item> findByName(String name);
-  //public Item findByIdCantidad(Long id, Integer cantidad);
   public Item findById(Long id);
 }
