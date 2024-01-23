@@ -65,7 +65,11 @@ public class ItemServiceImpl implements ItemService {
     Map<String, String> pathVariable = new HashMap<String, String>();
     pathVariable.put("id", id.toString());
     Producto producto = clienteRest.getForObject("http://servicio-productos/ver/{id}", Producto.class, pathVariable);
+    if (producto == null) {
+      throw new ProductNotFoundException("No se encontro el producto con el id: " + id);
+    }
     return new Item(producto);
   }
+
 
 }
